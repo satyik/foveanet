@@ -330,14 +330,14 @@ class ONChannelGINNode(nn.Module):
         # GIN Layer 1: [5 -> 64 -> 64]
         self.gin1 = GINConv(nn.Sequential(
             nn.Linear(in_dim, 64),
-            nn.BatchNorm1d(64),
+            nn.LayerNorm(64),
             nn.GELU(),
             nn.Linear(64, 64)
         ))
         # GIN Layer 2: [64 -> 128 -> 128]
         self.gin2 = GINConv(nn.Sequential(
             nn.Linear(64, 128),
-            nn.BatchNorm1d(128),
+            nn.LayerNorm(128),
             nn.GELU(),
             nn.Linear(128, 128)
         ))
@@ -386,7 +386,7 @@ class GINConvWithEdge(nn.Module):
         )
         self.mlp = nn.Sequential(
             nn.Linear(in_node_dim + 16, out_dim),
-            nn.BatchNorm1d(out_dim),
+            nn.LayerNorm(out_dim),
             nn.GELU(),
             nn.Linear(out_dim, out_dim)
         )
@@ -429,7 +429,7 @@ class OFFChannelGINNode(nn.Module):
         # GIN Layer 2 (Standard): [64 -> 128 -> 128]
         self.gin2 = GINConv(nn.Sequential(
             nn.Linear(64, 128),
-            nn.BatchNorm1d(128),
+            nn.LayerNorm(128),
             nn.GELU(),
             nn.Linear(128, 128)
         ))
@@ -473,11 +473,11 @@ class BindingPredictionHead(nn.Module):
         # Input: 262-dim concatenation
         self.c1 = nn.Linear(262, 512)
         
-        # Dual BatchNorm stabilization to prevent uniform-distribution collapse
-        self.bn1 = nn.BatchNorm1d(512)
+        # Dual LayerNorm stabilization to prevent uniform-distribution collapse
+        self.bn1 = nn.LayerNorm(512)
         self.c2 = nn.Linear(512, 256)
         
-        self.bn2 = nn.BatchNorm1d(256)
+        self.bn2 = nn.LayerNorm(256)
         self.c3 = nn.Linear(256, 128)
         
         self.dropout = nn.Dropout(p=0.25)
