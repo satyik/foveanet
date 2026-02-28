@@ -15,6 +15,7 @@ def get_args():
     parser.add_argument('--epochs', type=int, default=50, help='Total number of epochs to train (default: 50)')
     parser.add_argument('--lr', type=float, default=3e-4, help='Learning rate (default: 3e-4)')
     parser.add_argument('--workers', type=int, default=4, help='Number of data loading workers')
+    parser.add_argument('--dense-only', action='store_true', help='Override curriculum and force Dense Routing (Phase 1) for all epochs')
     return parser.parse_args()
 
 
@@ -107,7 +108,7 @@ def main():
         print(f"\n--- Epoch {epoch}/{args.epochs} ---")
         
         # 3-Phase Curriculum Schedule Management (Generation D)
-        if epoch <= 10:
+        if args.dense_only or epoch <= 10:
             current_phase = 1
             print("Phase 1: Dense Routing ON | Prior Error Tracking OFF")
             # Freeze prior net early to stop it hallucinating garbage into the GIN layers
