@@ -362,10 +362,15 @@ class ONChannelGINNode(nn.Module):
         x = self.gin1(nodes, edge_idx)
         x = self.gin2(x, edge_idx)
         
-        # Global Add Pool
+        # Global Mean Pool
         pooled = torch.zeros(B, 128, device=device)
         if nodes.size(0) > 0:
              pooled.scatter_add_(0, batch_idx.unsqueeze(1).expand(-1, 128), x)
+             
+             counts = torch.bincount(batch_idx, minlength=B).float()
+             # Avoid division by zero
+             counts = counts.clamp(min=1).unsqueeze(1)
+             pooled = pooled / counts
         
         return self.out_proj(pooled)
 
@@ -444,10 +449,14 @@ class OFFChannelGINNode(nn.Module):
         x = self.gin1(nodes, edge_idx, edge_feat)
         x = self.gin2(x, edge_idx)
         
-        # Global Add Pool
+        # Global Mean Pool
         pooled = torch.zeros(B, 128, device=device)
         if nodes.size(0) > 0:
              pooled.scatter_add_(0, batch_idx.unsqueeze(1).expand(-1, 128), x)
+             
+             counts = torch.bincount(batch_idx, minlength=B).float()
+             counts = counts.clamp(min=1).unsqueeze(1)
+             pooled = pooled / counts
         
         return self.out_proj(pooled)
 
